@@ -1,0 +1,6 @@
+# Links to Large Model Files
+# Add Google Drive or GitHub links here for models that exceed size limits
+
+Example:
+- Best Model (SVM): https://drive.google.com/...
+- Neural Network: https://drive.google.com/...

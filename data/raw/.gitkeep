@@ -1,0 +1,4 @@
+# Place your AG News dataset files here
+# Expected files:
+# - train.csv
+# - test.csv
