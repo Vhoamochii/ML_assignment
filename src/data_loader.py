@@ -24,16 +24,18 @@ class AGNewsLoader:
         train_path = os.path.join(self.data_path, train_file)
         test_path = os.path.join(self.data_path, test_file)
         
-        # AG News format: class_index, title, description
         columns = ['class', 'title', 'description']
         
-        train_df = pd.read_csv(train_path, names=columns)
-        test_df = pd.read_csv(test_path, names=columns)
+        train_df = pd.read_csv(train_path, names=columns, skiprows=1)
+        test_df = pd.read_csv(test_path, names=columns, skiprows=1)
+        
+        # Ensure class is integer type
+        train_df['class'] = train_df['class'].astype(int)
+        test_df['class'] = test_df['class'].astype(int)
         
         return train_df, test_df
     
     def combine_text(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Combine title and description into single text field"""
         df['text'] = df['title'] + ' ' + df['description']
         return df
     

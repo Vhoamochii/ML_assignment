@@ -38,16 +38,9 @@ class TextPreprocessor:
     
     def clean_text(self, text: str) -> str:
         """Clean and normalize text"""
-        # Lowercase
         text = text.lower()
-        
-        # Remove URLs
         text = re.sub(r'http\S+|www\S+', '', text)
-        
-        # Remove special characters and digits
         text = re.sub(r'[^a-zA-Z\s]', '', text)
-        
-        # Remove extra whitespace
         text = re.sub(r'\s+', ' ', text).strip()
         
         return text
@@ -67,8 +60,6 @@ class TextPreprocessor:
         return tokens
     
     def preprocess(self, text: str) -> str:
-        """Complete preprocessing pipeline"""
-        # Clean
         text = self.clean_text(text)
         
         # Tokenize

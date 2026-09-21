@@ -1,5 +1,3 @@
-"""Feature selection experiments with Bag of Words and TF-IDF"""
-
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.feature_selection import (
     SelectKBest, chi2, mutual_info_classif,
