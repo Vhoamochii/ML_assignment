@@ -16,21 +16,41 @@ btl/
 
 ## Setup Instructions
 
-### Prerequisites
+### Method 1: Using Docker (Recommended for Reproducibility)
+
+```bash
+# Build the Docker image
+docker build -t ag-news-ml-project .
+
+# Run Jupyter notebook server
+docker run -p 8888:8888 -v ${PWD}:/app ag-news-ml-project
+
+# Access Jupyter at http://localhost:8888 (check terminal for token)
+```
+
+### Method 2: Local Installation
+
+**Prerequisites:**
 - Python 3.8+
 - pip or conda
 
-### Installation
+**Installation:**
 1. Clone or extract the project
 2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
+3. Download NLTK data:
+```python
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet')"
+```
+
 ### Download Dataset
-The AG News dataset will be automatically downloaded when running the notebooks, or you can manually download from:
+Download the AG News dataset from:
 - Kaggle: https://www.kaggle.com/amananandrai/ag-news-classification-dataset
-- Hugging Face: https://huggingface.co/datasets/ag_news
+
+Place `train.csv` and `test.csv` in the `data/raw/` folder.
 
 ## Usage
 
@@ -69,6 +89,24 @@ jupyter notebook notebooks/04_evaluation.ipynb
 
 ## Results
 Results and visualizations are saved in the `results/` directory.
+
+## Reproducibility
+
+This project includes both `Dockerfile` and `requirements.txt` for easy reproduction:
+
+### Using Docker:
+```bash
+docker build -t ag-news-ml-project .
+docker run -p 8888:8888 -v ${PWD}:/app ag-news-ml-project
+```
+
+### Using pip:
+```bash
+pip install -r requirements.txt
+jupyter notebook
+```
+
+Both methods ensure the same environment and dependencies.
 
 ## Notes
 - Large model files are stored separately and linked in `models/model_links.txt`
