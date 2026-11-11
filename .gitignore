@@ -38,6 +38,10 @@ results/metrics/*.json
 *.swp
 *.swo
 
+# AI & Workspace internal tools
+.ai/
+.codegraph/
+
 # OS
 .DS_Store
 Thumbs.db
