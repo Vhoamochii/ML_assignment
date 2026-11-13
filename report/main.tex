@@ -148,7 +148,7 @@
 
 Kết quả trên tập validation cho thấy mọi mô hình đều vượt xa đường cơ sở dự đoán ngẫu nhiên. Tổ hợp Linear SVM kết hợp TF--IDF đạt hiệu năng cao nhất, với độ chính xác (accuracy) \textbf{0,9138} và macro-F1 \textbf{0,9136}. Thời gian huấn luyện của cấu hình này khoảng \textbf{2,79 giây}. Trên tập test độc lập, cùng cấu hình này đạt accuracy \textbf{0,9051} và macro-F1 \textbf{0,9049}.
 
-Phân tích lỗi cho thấy chủ đề Thể thao có độ phân biệt rõ nhất, trong khi phần lớn lỗi phân loại xuất phát từ sự chồng lấn từ vựng giữa Kinh doanh và Khoa học/Công nghệ. Thử nghiệm bổ sung về lựa chọn đặc trưng bằng kiểm định Chi-bình phương ($\chi^2$) cho thấy việc giữ trọn vẹn 5.000 từ vựng mang lại độ chính xác cao nhất ($0{,}9072$), hạn chế việc đánh mất các từ vựng đặc trưng theo từng chủ đề.
+Phân tích lỗi cho thấy chủ đề Thể thao có độ phân biệt rõ nhất, trong khi phần lớn lỗi phân loại xuất phát từ sự chồng lấn từ vựng giữa Kinh doanh và Khoa học/Công nghệ. Thử nghiệm bổ sung về lựa chọn đặc trưng bằng kiểm định Chi-bình phương ($\chi^2$) cho thấy việc giữ trọn vẹn 5.000 từ vựng mang lại độ chính xác cao nhất ($0{,}9138$), hạn chế việc đánh mất các từ vựng đặc trưng theo từng chủ đề.
 
 \clearpage
 \section*{Phân công công việc}
@@ -696,10 +696,10 @@ Thực nghiệm trên phương pháp Chi-bình phương được tiến hành b�
     \toprule
     \textbf{Số đặc trưng ($k$)} & \textbf{Accuracy} & \textbf{Macro-F1} & \textbf{Train (s)} \\
     \midrule
-    500   & 0,8611 & 0,8609 & 1,04 \\
-    1.000 & 0,8822 & 0,8819 & 1,25 \\
-    2.000 & 0,8995 & 0,8992 & 1,75 \\
-    5.000 & \textbf{0,9072} & \textbf{0,9071} & 2,64 \\
+    500   & 0,8628 & 0,8620 & 1,47 \\
+    1.000 & 0,8854 & 0,8850 & 1,71 \\
+    2.000 & 0,9021 & 0,9018 & 2,04 \\
+    5.000 & \textbf{0,9138} & \textbf{0,9136} & 2,82 \\
     \bottomrule
   \end{tabular}
   \par\vspace{3pt}
@@ -713,7 +713,7 @@ Thực nghiệm trên phương pháp Chi-bình phương được tiến hành b�
   \label{fig:chi2}
 \end{figure}
 
-Kết quả chứng minh rằng với bài toán phân loại tin tức đa lớp AG News, không gian 5.000 từ vựng ban đầu chưa bị hiện tượng bão hòa hay quá nhiều chiều dẫn đến quá khớp. Khi cắt giảm $k$ xuống dưới 2.000 từ (đặc biệt tại $k=500$, accuracy sụt giảm xuống $0{,}8611$), hiệu năng mô hình giảm sút rõ rệt do việc lược bỏ quá mức đã tước đi các từ khóa chuyên biệt theo từng chủ đề hẹp (như tên riêng địa chính trị, tên vận động viên, hoặc thuật ngữ công nghệ mới nổi). Do đó, cấu hình giữ nguyên 5.000 đặc trưng mang lại sự cân bằng tối ưu nhất giữa độ chính xác và chi phí bộ nhớ.
+Kết quả chứng minh rằng với bài toán phân loại tin tức đa lớp AG News, không gian 5.000 từ vựng ban đầu chưa bị hiện tượng bão hòa hay quá nhiều chiều dẫn đến quá khớp. Khi cắt giảm $k$ xuống dưới 2.000 từ (đặc biệt tại $k=500$, accuracy sụt giảm xuống $0{,}8628$), hiệu năng mô hình giảm sút rõ rệt do việc lược bỏ quá mức đã tước đi các từ khóa chuyên biệt theo từng chủ đề hẹp (như tên riêng địa chính trị, tên vận động viên, hoặc thuật ngữ công nghệ mới nổi). Do đó, cấu hình giữ nguyên 5.000 đặc trưng mang lại sự cân bằng tối ưu nhất giữa độ chính xác và chi phí bộ nhớ.
 
 \section{Tổ chức và quản lý mã nguồn của nhóm}
 
@@ -798,7 +798,7 @@ Thứ tự thực thi từ notebook 01 đến 04 cần được tuân thủ nghi
 
 Vì mỗi lớp chiếm đúng 25\%, accuracy là độ đo hợp lệ. Một lớp không thể làm tăng điểm chung chỉ nhờ có nhiều mẫu hơn. Báo cáo vẫn dùng thêm macro-F1 để kiểm tra xem có lớp nào bị hy sinh hay không. Trên sáu cấu hình validation, accuracy và macro-F1 lệch nhau dưới $0{,}002$. Khi nhìn theo từng lớp trên tập test, khoảng cách xuất hiện rõ hơn: \textbf{lớp Sports đạt F1 khoảng $0{,}96$}, còn \textbf{Business và Sci/Tech chỉ khoảng $0{,}87$--$0{,}88$}. Nếu chỉ nhìn accuracy khoảng $0{,}91$, người đọc dễ bỏ qua đúng chỗ mô hình còn yếu.
 
-Ba thuật toán được so sánh trên cùng hai cách biểu diễn BoW và TF--IDF. Naive Bayes đóng vai trò đường cơ sở nhanh. Logistic Regression và Linear SVM là hai mô hình tuyến tính với cách điều chuẩn khác nhau. Kết quả cho thấy \textbf{Linear SVM kết hợp TF--IDF là cấu hình tốt nhất} (validation 0,9138; test 0,9051). Cấu hình này vừa cao về accuracy vừa nhanh hơn SVM trên BoW. Thí nghiệm bổ sung về lựa chọn đặc trưng bằng kiểm định chi-bình phương cho thấy việc cắt giảm bớt số chiều xuống dưới 5.000 từ không cải thiện được hiệu năng so với cấu hình gốc 5.000 chiều ($0{,}9072$). Kết quả này khẳng định không gian đặc trưng TF--IDF 5.000 chiều kết hợp nguyên lý cực đại hóa lề của Linear SVM đã đạt được sự cân bằng tối ưu giữa độ phủ từ vựng và chi phí tính toán.
+Ba thuật toán được so sánh trên cùng hai cách biểu diễn BoW và TF--IDF. Naive Bayes đóng vai trò đường cơ sở nhanh. Logistic Regression và Linear SVM là hai mô hình tuyến tính với cách điều chuẩn khác nhau. Kết quả cho thấy \textbf{Linear SVM kết hợp TF--IDF là cấu hình tốt nhất} (validation 0,9138; test 0,9051). Cấu hình này vừa cao về accuracy vừa nhanh hơn SVM trên BoW. Thí nghiệm bổ sung về lựa chọn đặc trưng bằng kiểm định chi-bình phương cho thấy việc cắt giảm bớt số chiều xuống dưới 5.000 từ không cải thiện được hiệu năng so với cấu hình gốc 5.000 chiều ($0{,}9138$). Kết quả này khẳng định không gian đặc trưng TF--IDF 5.000 chiều kết hợp nguyên lý cực đại hóa lề của Linear SVM đã đạt được sự cân bằng tối ưu giữa độ phủ từ vựng và chi phí tính toán.
 
 Pipeline hiện tại còn bị giới hạn bởi biểu diễn unigram. Biểu diễn này không giữ thứ tự từ, khó xử lý từ đa nghĩa và câu diễn đạt khác nhau cùng một ý, đồng thời phụ thuộc vào chất lượng bước làm sạch. Phân tích hệ số của SVM cũng cho thấy nhiễu HTML/XML vẫn lọt vào từ vựng. Vì vậy, \textbf{cải thiện tiền xử lý có thể giảm lỗi mà chưa cần đổi thuật toán}.
 

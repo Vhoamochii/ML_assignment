@@ -189,6 +189,72 @@ def compare_bow_vs_tfidf(texts_train, texts_test, y_train, y_test,
 
 
 if __name__ == '__main__':
-    print("Feature selection module loaded")
-    print("Available representations: 'bow' (Bag of Words), 'tfidf' (TF-IDF)")
-    print("Available selection methods: 'chi2', 'mutual_info', 'tree_based'")
+    import os
+    import time
+    import joblib
+    from sklearn.svm import LinearSVC
+    from sklearn.metrics import accuracy_score, f1_score
+
+    print("=" * 60)
+    print("AG News - Feature Selection Experiment (Chi-Square)")
+    print("=" * 60)
+
+    train_path = os.path.join('data', 'processed', 'X_train_tfidf.pkl')
+    val_path = os.path.join('data', 'processed', 'X_val_tfidf.pkl')
+    y_train_path = os.path.join('data', 'processed', 'y_train.pkl')
+    y_val_path = os.path.join('data', 'processed', 'y_val.pkl')
+
+    if os.path.exists(train_path) and os.path.exists(val_path):
+        print("Loading processed TF-IDF data...")
+        X_train = joblib.load(train_path)
+        X_val = joblib.load(val_path)
+        y_train = joblib.load(y_train_path)
+        y_val = joblib.load(y_val_path)
+
+        k_list = [500, 1000, 2000, 5000]
+        results = []
+
+        for k in k_list:
+            t0 = time.time()
+            if k < 5000:
+                selector = SelectKBest(chi2, k=k)
+                X_tr_k = selector.fit_transform(X_train, y_train)
+                X_val_k = selector.transform(X_val)
+            else:
+                X_tr_k = X_train
+                X_val_k = X_val
+
+            clf = LinearSVC(C=1.0, random_state=42)
+            clf.fit(X_tr_k, y_train)
+            train_time = time.time() - t0
+
+            y_pred = clf.predict(X_val_k)
+            acc = accuracy_score(y_val, y_pred)
+            f1_m = f1_score(y_val, y_pred, average='macro')
+            results.append({'k': k, 'accuracy': acc, 'f1_macro': f1_m, 'train_time': train_time})
+            print(f"k = {k:4d} | Accuracy = {acc:.4f} | Macro-F1 = {f1_m:.4f} | Train Time = {train_time:.2f}s")
+
+        # Plot and save
+        fig_dir = os.path.join('report', 'graphics')
+        if os.path.exists(fig_dir):
+            fig_path = os.path.join(fig_dir, 'chi2_feature_selection.png')
+            plt.figure(figsize=(6.07, 4.23), dpi=180)
+            plt.plot([r['k'] for r in results], [r['accuracy'] for r in results],
+                     marker='o', color='#4e79a7', label='Accuracy', linewidth=1.5, markersize=5)
+            plt.plot([r['k'] for r in results], [r['f1_macro'] for r in results],
+                     marker='s', color='#f28e2b', label='Macro-F1', linewidth=1.5, markersize=5)
+            plt.title('Linear SVM after chi-square selection', fontsize=11, pad=8)
+            plt.xlabel('Number of chi-square features', fontsize=10)
+            plt.ylabel('Score', fontsize=10)
+            plt.xticks(k_list, ['500', '1000', '2000', '5000'], fontsize=9)
+            plt.yticks([0.85, 0.86, 0.87, 0.88, 0.89, 0.90, 0.91, 0.92], fontsize=9)
+            plt.ylim(0.85, 0.92)
+            plt.grid(True, linestyle='-', alpha=0.3)
+            plt.legend(frameon=False, loc='lower right', fontsize=9)
+            plt.tight_layout()
+            plt.savefig(fig_path, dpi=180)
+            plt.close()
+            print(f"\nFigure saved to: {fig_path}")
+    else:
+        print("Processed feature matrices not found in data/processed/.")
+        print("Please run notebooks/02_preprocessing.ipynb first.")
