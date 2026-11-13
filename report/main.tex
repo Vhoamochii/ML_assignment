@@ -486,19 +486,19 @@ Nhóm không dùng Kernel SVM vì chi phí tính toán cao trên khoảng 100.00
     \min_{\mathbf{W}, \mathbf{b}} \left\{ -\frac{1}{N} \sum_{i=1}^N \sum_{k=1}^K \mathbb{I}(y_i = k) \ln P(Y=k \mid \mathbf{x}_i) + \frac{1}{2C} \sum_{k=1}^K \|\mathbf{w}_k\|_2^2 \right\},
     \label{eq:logreg-loss}
   \end{equation}
-  với $\mathbb{I}(\cdot)$ là hàm chỉ thị. Siêu tham số phạt nghịch đảo $C=1{,}0$ kiểm soát độ mạnh của điều chuẩn, hạn chế hiện tượng quá khớp (overfitting) trên các từ hiếm. Nhóm cấu hình \texttt{max\_iter=1000} và tận dụng tính toán song song \texttt{n\_jobs=-1}.
+  với $\mathbb{I}(\cdot)$ là hàm chỉ thị. Siêu tham số phạt nghịch đảo $C=1{,}0$ kiểm soát độ mạnh của điều chuẩn, hạn chế hiện tượng quá khớp (overfitting) trên các từ hiếm. Nhóm cấu hình \texttt{max\_iter=1000} với bộ giải mặc định \texttt{lbfgs}. Đáng chú ý, đối với bài toán Softmax đa lớp tối ưu hóa đồng thời hàm mất mát Cross-Entropy toàn cục, thuật toán L-BFGS chạy đơn tiến trình và bỏ qua tham số \texttt{n\_jobs} (scikit-learn chỉ phân luồng đa xử lý qua \texttt{n\_jobs} khi áp dụng chiến lược One-vs-Rest độc lập); tuy vậy, quá trình tính toán vẫn được tăng tốc nhờ các phép toán ma trận của thư viện BLAS.
 
-  \item \textbf{Linear Support Vector Machine (Linear SVM):} Triển khai qua \texttt{LinearSVC} dựa trên thư viện LibLinear theo chiến lược One-vs-Rest (OvR). Với từng lớp $k$, mô hình tìm siêu phẳng phân tách $(\mathbf{w}_k, b_k)$ cực đại hóa lề phân lớp với hàm mất mát Hinge mềm (Soft-margin Hinge Loss):
+  \item \textbf{Linear Support Vector Machine (Linear SVM):} Triển khai qua \texttt{LinearSVC} dựa trên thư viện LibLinear theo chiến lược One-vs-Rest (OvR). Trong scikit-learn, \texttt{LinearSVC} mặc định áp dụng hàm mất mát Hinge bậc hai (Squared Hinge Loss, \texttt{loss='squared\_hinge'}) kết hợp điều chuẩn $L_2$ (\texttt{penalty='l2'}), giải bài toán tối ưu hóa lề mềm:
   \begin{equation}
-    \min_{\mathbf{w}_k, b_k, \boldsymbol{\xi}} \left\{ \frac{1}{2} \|\mathbf{w}_k\|_2^2 + C \sum_{i=1}^N \xi_i \right\}
+    \min_{\mathbf{w}_k, b_k, \boldsymbol{\xi}} \left\{ \frac{1}{2} \|\mathbf{w}_k\|_2^2 + C \sum_{i=1}^N \xi_i^2 \right\} \quad \text{s.t.} \quad y_{i,k} (\mathbf{w}_k^T \mathbf{x}_i + b_k) \ge 1 - \xi_i, \quad \xi_i \ge 0,
     \label{eq:svm-obj}
   \end{equation}
-  thỏa mãn ràng buộc:
+  tương đương với dạng hàm mục tiêu không ràng buộc trực tiếp:
   \begin{equation}
-    y_{i,k} (\mathbf{w}_k^T \mathbf{x}_i + b_k) \ge 1 - \xi_i, \quad \xi_i \ge 0, \quad \forall i=1,\ldots,N,
-    \label{eq:svm-constraint}
+    \min_{\mathbf{w}_k, b_k} \left\{ \frac{1}{2} \|\mathbf{w}_k\|_2^2 + C \sum_{i=1}^N \max\left(0, 1 - y_{i,k} (\mathbf{w}_k^T \mathbf{x}_i + b_k)\right)^2 \right\},
+    \label{eq:svm-unconstrained}
   \end{equation}
-  trong đó $y_{i,k} \in \{+1, -1\}$ (gán $+1$ nếu mẫu $i$ thuộc lớp $k$, ngược lại gán $-1$), và $\xi_i$ là biến bù (slack variable) đo mức vi phạm lề. Hàm quyết định đa lớp là:
+  trong đó $y_{i,k} \in \{+1, -1\}$ (gán $+1$ nếu mẫu $i$ thuộc lớp $k$, ngược lại gán $-1$), và $\xi_i$ là biến bù (slack variable) đo mức vi phạm lề. Việc sử dụng số hạng phạt bậc hai $\xi_i^2$ (Hinge bậc 2) giúp hàm mục tiêu khả vi liên tục, cho phép thuật toán Coordinate Descent trong LibLinear hội tụ nhanh và ổn định trên dữ liệu văn bản lớn nhiều chiều. Hàm quyết định đa lớp là:
   \begin{equation}
     \hat{y} = \arg\max_{k \in \{1,2,3,4\}} (\mathbf{w}_k^T \mathbf{x} + b_k).
     \label{eq:svm-decision}
@@ -676,11 +676,12 @@ Các hệ số dương lớn nhất của SVM cho thấy mô hình học đượ
     \label{eq:chi2}
   \end{equation}
   trong đó $A$ là số văn bản lớp $k$ chứa $t$; $B$ là số văn bản ngoài lớp $k$ chứa $t$; $C$ là số văn bản lớp $k$ không chứa $t$; $D$ là số văn bản ngoài lớp $k$ không chứa $t$; và $N=A+B+C+D$. Điểm đặc trưng tổng hợp là $\chi^2_{\max}(t) = \max_k \chi^2(t, k)$.
-  \item \textbf{Thông tin tương hỗ (Mutual Information):} Đo lượng thông tin thu được về nhãn chủ đề khi biết sự hiện diện của từ $t$:
+  \item \textbf{Thông tin tương hỗ (Mutual Information):} Đo lượng thông tin thu được về nhãn chủ đề $Y$ khi biết sự hiện diện hay vắng mặt của từ $t$. Gọi $X_t \in \{0, 1\}$ là biến ngẫu nhiên nhị phân biểu thị sự xuất hiện ($x=1$) hoặc vắng mặt ($x=0$) của từ $t$ trong văn bản:
   \begin{equation}
-    I(t; Y) = \sum_{t \in \{0, 1\}} \sum_{k=1}^K P(t, Y=k) \log_2 \frac{P(t, Y=k)}{P(t) P(Y=k)}.
+    I(X_t; Y) = \sum_{x \in \{0, 1\}} \sum_{k=1}^K P(X_t=x, Y=k) \log_2 \frac{P(X_t=x, Y=k)}{P(X_t=x) P(Y=k)},
     \label{eq:mutual-info}
   \end{equation}
+  trong đó $P(X_t=x, Y=k)$ là phân phối xác suất đồng thời, $P(X_t=x)$ và $P(Y=k)$ là các xác suất biên.
   \item \textbf{Mô hình cây (Tree-based):} Sử dụng kỹ thuật \texttt{SelectFromModel} kết hợp ensemble \texttt{RandomForest} đo lường mức giảm độ tạp chất Gini (Mean Decrease Impurity) để xếp hạng các đặc trưng quan trọng nhất.
 \end{enumerate}
 
@@ -772,9 +773,9 @@ ML_assignment/
 
 \firstparagraph Quy trình tái lập kết quả thực nghiệm được chuẩn hóa qua hai phương thức triển khai môi trường và một chuỗi thực thi tuần tự khép kín:
 
-\begin{enumerate}[leftmargin=2em,itemsep=5pt]
+\begin{enumerate}[leftmargin=2em,itemsep=2.5pt]
   \item \textbf{Khởi tạo môi trường:} 
-  \begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \begin{itemize}[leftmargin=1.5em,itemsep=1pt]
     \item \textit{Phương thức 1 (Docker):} Xây dựng image và khởi chạy container với cổng 8888:
     \par\vspace{2pt}
     \texttt{docker build -t ag-news-ml-project .}
