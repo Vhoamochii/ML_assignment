@@ -49,3 +49,14 @@ Thumbs.db
 # Large files
 *.zip
 *.tar.gz
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
